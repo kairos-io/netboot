@@ -68,7 +68,7 @@ func (s *Server) logTFTPTransfer(clientAddr net.Addr, path string, err error) {
 	if err != nil {
 		s.log("TFTP", "Send of %q to %s failed: %s", path, clientAddr, err)
 	} else {
-		s.log("TFTP", "Sent %q to %s", path, clientAddr)
+		s.log("TFTP", "Sent %q to %s", mac.String(), clientAddr)
 		s.machineEvent(mac, machineStateTFTP, "Sent iPXE to %s", clientAddr)
 	}
 }
