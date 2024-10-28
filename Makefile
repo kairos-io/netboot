@@ -48,15 +48,24 @@ ci-config:
 
 .PHONY: update-ipxe
 update-ipxe:
+	# Build arm64 ipxe
+	$(MAKE) CROSS_COMPILE=aarch64-linux-gnu- ARCH=arm64 -C third_party/ipxe/src bin-arm64-efi/ipxe.efi \
+	EMBED=$(HERE)/pixiecore/boot.ipxe bin-arm64-efi/ipxe.efi
+	# Build x86 ipxe. This helps with caching and avoids rebuildingon each run
+	$(MAKE) -C third_party/ipxe/src bin-i386-efi/ipxe.efi
+	$(MAKE) -C third_party/ipxe/src bin-x86_64-efi/ipxe.efi
+	# Embed x86 artifacts with pixiecore?
 	$(MAKE) -C third_party/ipxe/src \
 	EMBED=$(HERE)/pixiecore/boot.ipxe \
 	bin/ipxe.pxe \
 	bin/undionly.kpxe \
 	bin-x86_64-efi/ipxe.efi \
 	bin-i386-efi/ipxe.efi
-	go-bindata -o out/ipxe/bindata.go -pkg ipxe -nometadata -nomemcopy \
+	# Turn those generated binaries into go data
+	go run github.com/go-bindata/go-bindata/go-bindata -o out/ipxe/bindata.go -pkg ipxe -nometadata -nomemcopy \
 	third_party/ipxe/src/bin/ipxe.pxe \
 	third_party/ipxe/src/bin/undionly.kpxe \
+	third_party/ipxe/src/bin-arm64-efi/ipxe.efi \
 	third_party/ipxe/src/bin-x86_64-efi/ipxe.efi \
 	third_party/ipxe/src/bin-i386-efi/ipxe.efi
 	gofmt -s -w out/ipxe/bindata.go
