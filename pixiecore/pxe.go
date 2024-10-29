@@ -30,6 +30,7 @@ import (
 // actually BINL, and if so rename everything.
 
 func (s *Server) servePXE(conn net.PacketConn) error {
+	s.debug("PXE", "Listening for PXE requests on %s", conn.LocalAddr())
 	buf := make([]byte, 1024)
 	l := ipv4.NewPacketConn(conn)
 	if err := l.SetControlMessage(ipv4.FlagInterface, true); err != nil {

@@ -28,6 +28,7 @@ import (
 )
 
 func (s *Server) serveTFTP(l net.PacketConn) error {
+	s.debug("TFTP", "Listening for TFTP requests on %s", l.LocalAddr())
 	ts := tftp.Server{
 		Handler:     s.handleTFTP,
 		InfoLog:     func(msg string) { s.debug("TFTP", msg) },

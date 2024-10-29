@@ -152,7 +152,7 @@ const (
 	FirmwareEFIBC                         // 64-bit x86 processor running EFI
 	FirmwareX86Ipxe                       // "Classic" x86 BIOS running iPXE (no UNDI support)
 	FirmwarePixiecoreIpxe                 // Pixiecore's iPXE, which has replaced the underlying firmware
-	FirmwareEfiArm64
+	FirmwareEfiArm64                      // 64-bit ARM processor running EFI
 )
 
 // A Server boots machines using a Booter.

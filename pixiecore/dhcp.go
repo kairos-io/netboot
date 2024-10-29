@@ -18,11 +18,13 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"strings"
 
 	"go.universe.tf/netboot/dhcp4"
 )
 
 func (s *Server) serveDHCP(conn *dhcp4.Conn) error {
+	s.debug("DHCP", "Listening for DHCP requests on %s:%d", s.Address, s.DHCPPort)
 	for {
 		pkt, intf, err := conn.RecvDHCP()
 		if err != nil {
@@ -87,35 +89,57 @@ func (s *Server) isBootDHCP(pkt *dhcp4.Packet) error {
 		return fmt.Errorf("packet is %s, not %s", pkt.Type, dhcp4.MsgDiscover)
 	}
 
-	if pkt.Options[93] == nil {
+	if pkt.Options[dhcp4.OptClientSystem] == nil {
 		return errors.New("not a PXE boot request (missing option 93)")
 	}
 
 	return nil
 }
 
+func hasAnyPrefix(s string, prefixes []string) bool {
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(s, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
 func (s *Server) validateDHCP(pkt *dhcp4.Packet) (mach Machine, fwtype Firmware, err error) {
-	fwt, err := pkt.Options.Uint16(93)
+	fwt, err := pkt.Options.Uint16(dhcp4.OptClientSystem)
 	if err != nil {
 		return mach, 0, fmt.Errorf("malformed DHCP option 93 (required for PXE): %s", err)
+	}
+
+	// RPI clients have a MAC address that starts with one of the following prefixes
+	// Unfortunately they send a DHCP request with firmware type 0, so we need to
+	// check the MAC address to identify them as we have to set some specific options
+	rpiPrefixes := []string{"28:cd:c1:", "b8:27:eb:", "d8:3a:dd:", "dc:a6:32:", "e4:5f:01:"}
+	switch {
+	case hasAnyPrefix(pkt.HardwareAddr.String(), rpiPrefixes) && fwt == 0:
+		s.debug("DHCP", "We think we got an RPI client")
+		//mach.Arch = ArchArm64
+		//fwtype = FirmwareRPIArm64
+		//mach.MAC = pkt.HardwareAddr
+		return mach, 0, fmt.Errorf("unsupported client firmware type '%d'", fwt)
 	}
 
 	// Basic architecture and firmware identification, based purely on
 	// the PXE architecture option.
 	switch fwt {
-	case 0:
+	case 0: // x86 BIOS
 		mach.Arch = ArchIA32
 		fwtype = FirmwareX86PC
-	case 6:
+	case 6: // x86 UEFI
 		mach.Arch = ArchIA32
 		fwtype = FirmwareEFI32
-	case 7:
+	case 7: // x64 UEFI
 		mach.Arch = ArchX64
 		fwtype = FirmwareEFI64
-	case 9:
+	case 9: // EBC
 		mach.Arch = ArchX64
 		fwtype = FirmwareEFIBC
-	case 11:
+	case 11: // ARM 64-bit UEFI
 		mach.Arch = ArchArm64
 		fwtype = FirmwareEfiArm64
 	default:
@@ -144,7 +168,7 @@ func (s *Server) validateDHCP(pkt *dhcp4.Packet) (mach Machine, fwtype Firmware,
 		}
 	}
 
-	guid := pkt.Options[97]
+	guid := pkt.Options[dhcp4.OptUidGuidClientIdentifier]
 	switch len(guid) {
 	case 0:
 		// A missing GUID is invalid according to the spec, however
@@ -178,8 +202,8 @@ func (s *Server) offerDHCP(pkt *dhcp4.Packet, mach Machine, serverIP net.IP, fwt
 	// says the server should identify itself as a PXEClient vendor
 	// type, even though it's a server. Strange.
 	resp.Options[dhcp4.OptVendorIdentifier] = []byte("PXEClient")
-	if pkt.Options[97] != nil {
-		resp.Options[97] = pkt.Options[97]
+	if pkt.Options[dhcp4.OptUidGuidClientIdentifier] != nil {
+		resp.Options[dhcp4.OptUidGuidClientIdentifier] = pkt.Options[dhcp4.OptUidGuidClientIdentifier]
 	}
 
 	switch fwtype {
@@ -196,7 +220,7 @@ func (s *Server) offerDHCP(pkt *dhcp4.Packet, mach Machine, serverIP net.IP, fwt
 		if err != nil {
 			return nil, fmt.Errorf("failed to serialize PXE vendor options: %s", err)
 		}
-		resp.Options[43] = bs
+		resp.Options[dhcp4.OptVendorSpecific] = bs
 		resp.BootServerName = serverIP.String()
 		resp.BootFilename = fmt.Sprintf("%s/%d", mach.MAC, fwtype)
 
@@ -210,7 +234,7 @@ func (s *Server) offerDHCP(pkt *dhcp4.Packet, mach Machine, serverIP net.IP, fwt
 		if err != nil {
 			return nil, fmt.Errorf("failed to serialize PXE vendor options: %s", err)
 		}
-		resp.Options[43] = bs
+		resp.Options[dhcp4.OptVendorSpecific] = bs
 		resp.BootFilename = fmt.Sprintf("tftp://%s/%s/%d", serverIP, mach.MAC, fwtype)
 
 	case FirmwareEFI32, FirmwareEFI64, FirmwareEFIBC, FirmwareEfiArm64:

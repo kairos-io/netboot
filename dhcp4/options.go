@@ -31,30 +31,31 @@ type Option byte
 // http://www.iana.org/assignments/bootp-dhcp-parameters/bootp-dhcp-parameters.xhtml
 // for the full authoritative list.
 const (
-	OptSubnetMask         Option = 1  // IPMask
-	OptTimeOffset         Option = 2  // int32
-	OptRouters            Option = 3  // IPs
-	OptDNSServers         Option = 6  // IPs
-	OptHostname           Option = 12 // string
-	OptBootFileSize       Option = 13 // uint16
-	OptDomainName         Option = 15 // string
-	OptInterfaceMTU       Option = 26 // uint16
-	OptBroadcastAddr      Option = 28 // IP
-	OptNTPServers         Option = 42 // IP
-	OptVendorSpecific     Option = 43 // []byte
-	OptRequestedIP        Option = 50 // IP
-	OptLeaseTime          Option = 51 // uint32
-	OptOverload           Option = 52 // byte
-	OptServerIdentifier   Option = 54 // IP
-	OptRequestedOptions   Option = 55 // []byte
-	OptMessage            Option = 56 // string
-	OptMaximumMessageSize Option = 57 // uint16
-	OptRenewalTime        Option = 58 // uint32
-	OptRebindingTime      Option = 59 // uint32
-	OptVendorIdentifier   Option = 60 // string
-	OptClientIdentifier   Option = 61 // string
-	OptFQDN               Option = 81 // string
-
+	OptSubnetMask              Option = 1  // IPMask
+	OptTimeOffset              Option = 2  // int32
+	OptRouters                 Option = 3  // IPs
+	OptDNSServers              Option = 6  // IPs
+	OptHostname                Option = 12 // string
+	OptBootFileSize            Option = 13 // uint16
+	OptDomainName              Option = 15 // string
+	OptInterfaceMTU            Option = 26 // uint16
+	OptBroadcastAddr           Option = 28 // IP
+	OptNTPServers              Option = 42 // IP
+	OptVendorSpecific          Option = 43 // []byte
+	OptRequestedIP             Option = 50 // IP
+	OptLeaseTime               Option = 51 // uint32
+	OptOverload                Option = 52 // byte
+	OptServerIdentifier        Option = 54 // IP
+	OptRequestedOptions        Option = 55 // []byte
+	OptMessage                 Option = 56 // string
+	OptMaximumMessageSize      Option = 57 // uint16
+	OptRenewalTime             Option = 58 // uint32
+	OptRebindingTime           Option = 59 // uint32
+	OptVendorIdentifier        Option = 60 // string
+	OptClientIdentifier        Option = 61 // string
+	OptFQDN                    Option = 81 // string
+	OptClientSystem            Option = 93
+	OptUidGuidClientIdentifier Option = 97 //
 	// You shouldn't need to use the following directly. Instead,
 	// refer to the fields in the Packet struct, and Marshal/Unmarshal
 	// will handle encoding for you.
