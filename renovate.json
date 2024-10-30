@@ -1,0 +1,20 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base"
+  ],
+  "schedule": [
+    "after 11pm every weekday",
+    "before 7am every weekday",
+    "every weekend"
+  ],
+  "reviewers": [ "team:maintainers" ],
+  "timezone": "Europe/Brussels",
+  "rebaseWhen": "behind-base-branch",
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    }
+  ]
+}
