@@ -1,10 +1,13 @@
+// Copyright 2024 Kairos contributors
+
 package types
 
 import (
-	"go.universe.tf/netboot/constants"
 	"io"
 	"net"
 	"time"
+
+	"github.com/kairos-io/netboot/constants"
 )
 
 // A Booter provides boot instructions and files for machines.

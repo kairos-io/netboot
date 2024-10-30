@@ -1,4 +1,5 @@
 // Copyright 2016 Google Inc.
+// Copyright 2024 Kairos contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,12 +19,13 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"go.universe.tf/netboot/types"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/kairos-io/netboot/types"
 )
 
 type booterFunc func(types.Machine) (*types.Spec, error)

@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"go.universe.tf/netboot/types"
+	"github.com/kairos-io/netboot/types"
 )
 
 type associationExpiration struct {

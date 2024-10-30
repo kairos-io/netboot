@@ -3,12 +3,13 @@ package dhcp6
 import (
 	"bytes"
 	"fmt"
-	"go.universe.tf/netboot/constants"
 	"net"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/kairos-io/netboot/constants"
 )
 
 // BootConfiguration implementation provides values for dhcp options served to dhcp clients

@@ -1,4 +1,5 @@
 // Copyright 2016 Google Inc.
+// Copyright 2024 Kairos contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,22 +13,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server // import "go.universe.tf/netboot/pixiecore"
+package server
 
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/sanity-io/litter"
 	"net"
-	"regexp"
 	"sync"
 	"time"
 
-	"go.universe.tf/netboot/assets"
-	"go.universe.tf/netboot/constants"
-	"go.universe.tf/netboot/dhcp4"
-	"go.universe.tf/netboot/dhcp6"
-	"go.universe.tf/netboot/types"
+	"github.com/kairos-io/netboot/assets"
+	"github.com/kairos-io/netboot/constants"
+	"github.com/kairos-io/netboot/dhcp4"
+	"github.com/kairos-io/netboot/dhcp6"
+	"github.com/kairos-io/netboot/types"
 )
 
 // A Server boots machines using a Booter.
@@ -86,8 +85,6 @@ func (s *Server) SetDefaultFirmwares() {
 // Serve listens for machines attempting to boot, and uses Booter to
 // help them.
 func (s *Server) Serve() error {
-	litter.Config.FieldExclusions, _ = regexp.Compile(`Ipxe`)
-	fmt.Println(litter.Sdump(s))
 	if s.DHCPPort == 0 {
 		s.DHCPPort = constants.PortDHCP
 	}

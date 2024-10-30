@@ -1,4 +1,5 @@
 // Copyright 2016 Google Inc.
+// Copyright 2024 Kairos contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,10 +18,10 @@ package server
 import (
 	"errors"
 	"fmt"
-	"go.universe.tf/netboot/constants"
 	"net"
 
-	"go.universe.tf/netboot/dhcp4"
+	"github.com/kairos-io/netboot/constants"
+	"github.com/kairos-io/netboot/dhcp4"
 	"golang.org/x/net/ipv4"
 )
 

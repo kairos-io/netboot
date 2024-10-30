@@ -6,7 +6,7 @@ import (
 	"net"
 	"testing"
 
-	"go.universe.tf/netboot/types"
+	"github.com/kairos-io/netboot/types"
 )
 
 func TestMakeMsgAdvertise(t *testing.T) {

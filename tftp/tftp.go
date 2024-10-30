@@ -1,4 +1,5 @@
 // Copyright 2016 Google Inc.
+// Copyright 2024 Kairos contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +14,7 @@
 // limitations under the License.
 
 // Package tftp implements a read-only TFTP server.
-package tftp // import "go.universe.tf/netboot/tftp"
+package tftp
 
 import (
 	"bytes"

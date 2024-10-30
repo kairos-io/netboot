@@ -1,4 +1,5 @@
 // Copyright 2016 Google Inc.
+// Copyright 2024 Kairos contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,7 +23,7 @@ import (
 	"reflect"
 	"testing"
 
-	"go.universe.tf/netboot/test/pcap"
+	"github.com/kairos-io/netboot/test/pcap"
 )
 
 func udpFromPcap(fname string) ([][]byte, error) {

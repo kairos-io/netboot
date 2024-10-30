@@ -1,10 +1,12 @@
+// Copyright 2024 Kairos contributors
+
 package main
 
 import (
 	"fmt"
-	"go.universe.tf/netboot/booters"
-	"go.universe.tf/netboot/server"
-	"go.universe.tf/netboot/types"
+	"github.com/kairos-io/netboot/booters"
+	"github.com/kairos-io/netboot/server"
+	"github.com/kairos-io/netboot/types"
 )
 
 // This runs a quick server that serves iPXE and Debian netboot files.

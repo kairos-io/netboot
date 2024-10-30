@@ -1,4 +1,5 @@
 // Copyright 2016 Google Inc.
+// Copyright 2024 Kairos contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,9 +19,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"go.universe.tf/netboot/constants"
-	"go.universe.tf/netboot/types"
-	"go.universe.tf/netboot/utils"
 	"io"
 	"net"
 	"net/http"
@@ -28,6 +26,10 @@ import (
 	"strconv"
 	"text/template"
 	"time"
+
+	"github.com/kairos-io/netboot/constants"
+	"github.com/kairos-io/netboot/types"
+	"github.com/kairos-io/netboot/utils"
 )
 
 func serveHTTP(l net.Listener, handlers ...func(*http.ServeMux)) error {

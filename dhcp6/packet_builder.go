@@ -5,7 +5,7 @@ import (
 	"hash/fnv"
 	"net"
 
-	"go.universe.tf/netboot/types"
+	"github.com/kairos-io/netboot/types"
 )
 
 // PacketBuilder is used for generating responses to requests received from dhcp clients

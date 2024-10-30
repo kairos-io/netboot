@@ -1,3 +1,5 @@
+// Copyright 2024 Kairos contributors
+
 package utils
 
 import (

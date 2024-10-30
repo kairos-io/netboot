@@ -1,4 +1,5 @@
 // Copyright 2016 Google Inc.
+// Copyright 2024 Kairos contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,4 +14,4 @@
 // limitations under the License.
 
 // Package dhcp4 provides building blocks for DHCP clients and servers.
-package dhcp4 // import "go.universe.tf/netboot/dhcp4"
+package dhcp4
