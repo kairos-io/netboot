@@ -31,10 +31,10 @@ func (s *Server) serveDHCP(conn *dhcp4.Conn) error {
 	for {
 		pkt, intf, err := conn.RecvDHCP()
 		if err != nil {
-			return fmt.Errorf("Receiving DHCP packet: %s", err)
+			return fmt.Errorf("receiving DHCP packet: %s", err)
 		}
 		if intf == nil {
-			return fmt.Errorf("Received DHCP packet with no interface information (this is a violation of dhcp4.Conn's contract, please file a bug)")
+			return fmt.Errorf("received DHCP packet with no interface information (this is a violation of dhcp4.Conn's contract, please file a bug)")
 		}
 
 		if err = s.isBootDHCP(pkt); err != nil {

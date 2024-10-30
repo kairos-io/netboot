@@ -21,6 +21,20 @@ const (
 // Architecture describes a kind of CPU architecture.
 type Architecture int
 
+// String returns a human-readable name for the architecture.
+func (a Architecture) String() string {
+	switch a {
+	case ArchIA32:
+		return "IA32"
+	case ArchX64:
+		return "X64"
+	case ArchArm64:
+		return "Arm64"
+	default:
+		return "Unknown"
+	}
+}
+
 // Architecture types that Pixiecore knows how to boot.
 //
 // These architectures are self-reported by the booting machine. The
