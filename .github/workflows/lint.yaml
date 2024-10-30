@@ -4,12 +4,20 @@ on:
     branches:
       - main
   pull_request:
-    paths:
-      - '**'
-permissions: read-all
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
-  call-workflow:
-    uses: kairos-io/linting-composite-action/.github/workflows/reusable-linting.yaml@8dd82218a024735daac578d2588522a5b4bb2614 # v0.0.9
-    with:
-      yamldirs: ".github/workflows/"
-      is-go: true
+  golangci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          only-new-issues: 'true'
