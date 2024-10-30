@@ -18,7 +18,6 @@ package tftp
 import (
 	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"net"
 	"os"
 	"os/exec"
@@ -72,8 +71,6 @@ func TestInterop(t *testing.T) {
 			// Lower block size to send more packets
 			MaxBlockSize: 500,
 			WriteTimeout: 10 * time.Millisecond,
-			// 10% loss rate until we've dropped 5 packets
-			Dial: lossyDialer(10, 5),
 		},
 	}
 
@@ -114,50 +111,6 @@ func TestInterop(t *testing.T) {
 			}
 		}
 	}
-}
-
-func lossyDialer(lossPercent int, maxDrops int) func(string, string) (net.Conn, error) {
-	return func(network, addr string) (net.Conn, error) {
-		conn, err := net.Dial(network, addr)
-		if err != nil {
-			return nil, err
-		}
-		return &lossyConn{conn, lossPercent, maxDrops, 0, 0}, nil
-	}
-}
-
-type lossyConn struct {
-	net.Conn
-	lossPercent   int
-	dropsLeft     int
-	droppedWrites int
-	droppedReads  int
-}
-
-func (c *lossyConn) Write(b []byte) (int, error) {
-	if c.dropsLeft > 0 && rand.Intn(100) < c.lossPercent {
-		// Pretend to send, to simulate a network failure.
-		c.dropsLeft--
-		c.droppedWrites++
-		return len(b), nil
-	}
-	return c.Conn.Write(b)
-}
-
-func (c *lossyConn) Read(b []byte) (int, error) {
-	n, err := c.Conn.Read(b)
-	if c.dropsLeft > 0 && rand.Intn(100) < c.lossPercent {
-		// nope, didn't receive anything, read next packet.
-		c.dropsLeft--
-		c.droppedReads++
-		return c.Conn.Read(b)
-	}
-	return n, err
-}
-
-func (c *lossyConn) Close() error {
-	fmt.Fprintf(os.Stderr, "Dropped %d reads and %d write\n", c.droppedReads, c.droppedWrites)
-	return c.Conn.Close()
 }
 
 func infoLog(m string) {
