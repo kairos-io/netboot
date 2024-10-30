@@ -1,7 +1,1 @@
-cmd/pixiecore-apache2/pixiecore-apache2
-cmd/pixiecore/pixiecore
-dhcp4/dhcp4.test
-test/pcap.test
-server/pixiecore.test
-vendor/
-build/
+coverage.out
