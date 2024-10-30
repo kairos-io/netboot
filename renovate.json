@@ -11,6 +11,7 @@
   "reviewers": [ "team:maintainers" ],
   "timezone": "Europe/Brussels",
   "rebaseWhen": "behind-base-branch",
+  "forkProcessing": "enabled",
   "packageRules": [
     {
       "matchUpdateTypes": ["patch"],
