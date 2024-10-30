@@ -12,6 +12,8 @@ jobs:
   tests:
     runs-on: kvm
     steps:
+      - name: Install test deps
+        run: sudo apt-get update && sudo apt-get install -y atftp
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -21,6 +23,8 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Run tests
+        env:
+          CGO_ENABLED: 1
         run: |
           go run github.com/onsi/ginkgo/v2/ginkgo run -p --github-output  --covermode=atomic --coverprofile=coverage.out --race -r ./...
       - name: Codecov
