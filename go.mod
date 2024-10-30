@@ -1,6 +1,7 @@
 module go.universe.tf/netboot
 
 require (
+	github.com/go-bindata/go-bindata v3.1.2+incompatible // indirect
 	github.com/google/go-cmp v0.5.9
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/sanity-io/litter v1.5.5

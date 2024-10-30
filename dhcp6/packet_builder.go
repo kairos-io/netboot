@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 	"hash/fnv"
 	"net"
+
+	"go.universe.tf/netboot/types"
 )
 
 // PacketBuilder is used for generating responses to requests received from dhcp clients
@@ -18,7 +20,7 @@ func MakePacketBuilder(preferredLifetime, validLifetime uint32) *PacketBuilder {
 }
 
 // BuildResponse generates a response packet for a packet received from a client
-func (b *PacketBuilder) BuildResponse(in *Packet, serverDUID []byte, configuration BootConfiguration, addresses AddressPool) (*Packet, error) {
+func (b *PacketBuilder) BuildResponse(in *Packet, serverDUID []byte, configuration BootConfiguration, addresses types.AddressPool) (*Packet, error) {
 	switch in.Type {
 	case MsgSolicit:
 		bootFileURL, err := configuration.GetBootURL(b.extractLLAddressOrID(in.Options.ClientID()), in.Options.ClientArchType())
@@ -56,7 +58,7 @@ func (b *PacketBuilder) BuildResponse(in *Packet, serverDUID []byte, configurati
 }
 
 func (b *PacketBuilder) makeMsgAdvertise(transactionID [3]byte, serverDUID, clientID []byte, clientArchType uint16,
-	associations []*IdentityAssociation, bootFileURL, preference []byte, dnsServers []net.IP) *Packet {
+	associations []*types.IdentityAssociation, bootFileURL, preference []byte, dnsServers []net.IP) *Packet {
 	retOptions := make(Options)
 	retOptions.Add(MakeOption(OptClientID, clientID))
 	for _, association := range associations {
@@ -79,7 +81,7 @@ func (b *PacketBuilder) makeMsgAdvertise(transactionID [3]byte, serverDUID, clie
 }
 
 func (b *PacketBuilder) makeMsgReply(transactionID [3]byte, serverDUID, clientID []byte, clientArchType uint16,
-	associations []*IdentityAssociation, iasWithoutAddresses [][]byte, bootFileURL []byte, dnsServers []net.IP, err error) *Packet {
+	associations []*types.IdentityAssociation, iasWithoutAddresses [][]byte, bootFileURL []byte, dnsServers []net.IP, err error) *Packet {
 	retOptions := make(Options)
 	retOptions.Add(MakeOption(OptClientID, clientID))
 	for _, association := range associations {
@@ -158,7 +160,7 @@ func (b *PacketBuilder) extractLLAddressOrID(optClientID []byte) []byte {
 	}
 }
 
-func iasWithoutAddesses(availableAssociations []*IdentityAssociation, allIAs [][]byte) [][]byte {
+func iasWithoutAddesses(availableAssociations []*types.IdentityAssociation, allIAs [][]byte) [][]byte {
 	ret := make([][]byte, 0)
 	iasWithAddresses := make(map[uint64]bool)
 

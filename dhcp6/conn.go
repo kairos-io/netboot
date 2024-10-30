@@ -12,18 +12,18 @@ type Conn struct {
 	group         net.IP
 	ifi           *net.Interface
 	listenAddress string
-	listenPort    string
+	listenPort    int
 }
 
 // NewConn creates a new Conn bound to specified address and port
-func NewConn(addr, port string) (*Conn, error) {
+func NewConn(addr string, port int) (*Conn, error) {
 	ifi, err := InterfaceByAddress(addr)
 	if err != nil {
 		return nil, err
 	}
 
 	group := net.ParseIP("ff02::1:2")
-	c, err := net.ListenPacket("udp6", "[::]:"+port)
+	c, err := net.ListenPacket("udp6", fmt.Sprintf("[::]:%d", port))
 	if err != nil {
 		return nil, err
 	}
@@ -56,12 +56,12 @@ func (c *Conn) Close() error {
 func InterfaceByAddress(ifAddr string) (*net.Interface, error) {
 	allIfis, err := net.Interfaces()
 	if err != nil {
-		return nil, fmt.Errorf("Error getting network interface information: %s", err)
+		return nil, fmt.Errorf("error getting network interface information: %s", err)
 	}
 	for _, ifi := range allIfis {
 		addrs, err := ifi.Addrs()
 		if err != nil {
-			return nil, fmt.Errorf("Error getting network interface address information: %s", err)
+			return nil, fmt.Errorf("error getting network interface address information: %s", err)
 		}
 		for _, addr := range addrs {
 			if addrToIP(addr).String() == ifAddr {
@@ -69,7 +69,7 @@ func InterfaceByAddress(ifAddr string) (*net.Interface, error) {
 			}
 		}
 	}
-	return nil, fmt.Errorf("Couldn't find an interface with address %s", ifAddr)
+	return nil, fmt.Errorf("couldn't find an interface with address %s", ifAddr)
 }
 
 func addrToIP(a net.Addr) net.IP {
