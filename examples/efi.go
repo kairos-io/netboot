@@ -17,7 +17,7 @@ func main() {
 
 	ret.SetDefaultFirmwares()
 	booterSpec := &types.Spec{
-		Efi: types.ID("test.efi"),
+		Efi: types.ID("https://boot.netboot.xyz/ipxe/netboot.xyz.efi"),
 	}
 	b, _ := booters.StaticBooter(booterSpec)
 	ret.Booter = b
