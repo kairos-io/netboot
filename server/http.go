@@ -107,7 +107,16 @@ func (s *Server) handleIpxe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	start = time.Now()
-	script, err := ipxeScript(mach, spec, r.Host)
+	var script []byte
+
+	if spec.Efi != "" {
+		s.log("HTTP", "Constructing ipxe script for %s with Efi", mac)
+		script, err = ipxeScriptEfi(mach, spec, r.Host)
+	} else {
+		s.log("HTTP", "Constructing ipxe script for %s", mac)
+		script, err = ipxeScript(mach, spec, r.Host)
+	}
+
 	s.debug("HTTP", "Construct ipxe script for %s took %s", mac, time.Since(start))
 	if err != nil {
 		s.log("HTTP", "Failed to assemble ipxe script for %s (query %q from %s): %s", mac, r.URL, r.RemoteAddr, err)
@@ -125,6 +134,7 @@ func (s *Server) handleIpxe(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleFile(w http.ResponseWriter, r *http.Request) {
+	overallStart := time.Now()
 	name := r.URL.Query().Get("name")
 	if name == "" {
 		s.debug("HTTP", "Bad request %q from %s, missing filename", r.URL, r.RemoteAddr)
@@ -147,7 +157,7 @@ func (s *Server) handleFile(w http.ResponseWriter, r *http.Request) {
 		s.log("HTTP", "Copy of %q to %s (query %q) failed: %s", name, r.RemoteAddr, r.URL, err)
 		return
 	}
-	s.log("HTTP", "Sent file %q to %s", name, r.RemoteAddr)
+	s.log("HTTP", "Sent file %q to %s took %s", name, r.RemoteAddr, time.Since(overallStart))
 
 	switch r.URL.Query().Get("type") {
 	case "kernel":
@@ -186,6 +196,7 @@ func (s *Server) handleBooting(w http.ResponseWriter, r *http.Request) {
 	s.machineEvent(mac, machineStateBooted, "Booting into OS")
 }
 
+// ipxeScript generates an iPXE script for a machine.
 func ipxeScript(mach types.Machine, spec *types.Spec, serverHost string) ([]byte, error) {
 	if spec.IpxeScript != "" {
 		return []byte(spec.IpxeScript), nil
@@ -221,6 +232,20 @@ func ipxeScript(mach types.Machine, spec *types.Spec, serverHost string) ([]byte
 		return nil, fmt.Errorf("expanding cmdline %q: %s", spec.Cmdline, err)
 	}
 	b.WriteString(cmdline)
+	b.WriteByte('\n')
+
+	return b.Bytes(), nil
+}
+
+// ipxeScriptEfi generates an iPXE script for a machine that boots via EFI.
+func ipxeScriptEfi(mach types.Machine, spec *types.Spec, serverHost string) ([]byte, error) {
+	if spec.IpxeScript != "" {
+		return []byte(spec.IpxeScript), nil
+	}
+
+	var b bytes.Buffer
+	b.WriteString("#!ipxe\n")
+	b.WriteString(fmt.Sprintf("chain --autofree http://%s/_/file?name=%s&type=efi&mac=%s\n", serverHost, spec.Efi, url.QueryEscape(mach.MAC.String())))
 	b.WriteByte('\n')
 
 	return b.Bytes(), nil

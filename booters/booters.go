@@ -37,27 +37,37 @@ import (
 //
 // IDs in spec should be either local file paths, or HTTP/HTTPS URLs.
 func StaticBooter(spec *types.Spec) (types.Booter, error) {
-	ret := &staticBooter{
-		kernel: string(spec.Kernel),
-		spec: &types.Spec{
-			Kernel:  "kernel",
-			Message: spec.Message,
-		},
+	var ret *staticBooter
+	if spec.Efi != "" {
+		ret = &staticBooter{
+			efi: string(spec.Efi),
+			spec: &types.Spec{
+				Efi:     "efi",
+				Message: spec.Message,
+			},
+		}
+	} else {
+		ret = &staticBooter{
+			kernel: string(spec.Kernel),
+			spec: &types.Spec{
+				Kernel:  "kernel",
+				Message: spec.Message,
+			},
+		}
+		for i, initrd := range spec.Initrd {
+			ret.initrd = append(ret.initrd, string(initrd))
+			ret.spec.Initrd = append(ret.spec.Initrd, types.ID(fmt.Sprintf("initrd-%d", i)))
+		}
+		f := func(id string) string {
+			ret.otherIDs = append(ret.otherIDs, id)
+			return fmt.Sprintf("{{ ID \"other-%d\" }}", len(ret.otherIDs)-1)
+		}
+		cmdline, err := utils.ExpandCmdline(spec.Cmdline, template.FuncMap{"ID": f})
+		if err != nil {
+			return nil, err
+		}
+		ret.spec.Cmdline = cmdline
 	}
-	for i, initrd := range spec.Initrd {
-		ret.initrd = append(ret.initrd, string(initrd))
-		ret.spec.Initrd = append(ret.spec.Initrd, types.ID(fmt.Sprintf("initrd-%d", i)))
-	}
-
-	f := func(id string) string {
-		ret.otherIDs = append(ret.otherIDs, id)
-		return fmt.Sprintf("{{ ID \"other-%d\" }}", len(ret.otherIDs)-1)
-	}
-	cmdline, err := utils.ExpandCmdline(spec.Cmdline, template.FuncMap{"ID": f})
-	if err != nil {
-		return nil, err
-	}
-	ret.spec.Cmdline = cmdline
 
 	return ret, nil
 }
@@ -66,6 +76,7 @@ type staticBooter struct {
 	kernel   string
 	initrd   []string
 	otherIDs []string
+	efi      string
 
 	spec *types.Spec
 }
@@ -103,7 +114,8 @@ func (s *staticBooter) ReadBootFile(id types.ID) (io.ReadCloser, int64, error) {
 	switch {
 	case path == "kernel":
 		return s.serveFile(s.kernel)
-
+	case path == "efi":
+		return s.serveFile(s.efi)
 	case strings.HasPrefix(path, "initrd-"):
 		i, err := strconv.Atoi(path[7:])
 		if err != nil || i < 0 || i >= len(s.initrd) {

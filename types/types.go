@@ -48,6 +48,10 @@ type Spec struct {
 	Kernel ID
 	// Optional init ramdisks for linux kernels
 	Initrd []ID
+
+	// Optional efi binary to boot
+	// Either Efi or Kernel must be set
+	Efi ID
 	// Optional kernel commandline. This string is evaluated as a
 	// text/template template, in which "ID(x)" function is
 	// available. Invoking ID(x) returns a URL that will call
