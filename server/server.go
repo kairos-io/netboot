@@ -48,7 +48,6 @@ type Server struct {
 	// Debug receives extensive logging on Pixiecore's internals. Very
 	// useful for debugging, but very verbose.
 	Debug func(subsystem, msg string)
-
 	// These ports can technically be set for testing, but the
 	// protocols burned in firmware on the client side hardcode these,
 	// so if you change them in production, nothing will work.

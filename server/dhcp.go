@@ -145,6 +145,10 @@ func (s *Server) validateDHCP(pkt *dhcp4.Packet) (mach types.Machine, fwtype con
 	case 11: // ARM 64-bit UEFI
 		mach.Arch = constants.ArchArm64
 		fwtype = constants.FirmwareEfiArm64
+	case 16: // http efi boot x64
+		return mach, 0, fmt.Errorf("unsupported client firmware type (probably http4 efi boot)")
+	case 19: // http efi boot arm64
+		return mach, 0, fmt.Errorf("unsupported client firmware type (probably http4 efi boot)")
 	default:
 		return mach, 0, fmt.Errorf("unsupported client firmware type '%d'", fwt)
 	}

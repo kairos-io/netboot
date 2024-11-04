@@ -3,15 +3,21 @@ package main
 import (
 	"fmt"
 	"github.com/kairos-io/netboot/booters"
+	"github.com/kairos-io/netboot/log"
 	"github.com/kairos-io/netboot/server"
 	"github.com/kairos-io/netboot/types"
+	"github.com/rs/zerolog"
+	"time"
 )
 
 // This runs a quick server that serves an efi file directly, good for UKI.
 func main() {
+	log.Log = zerolog.New(zerolog.NewConsoleWriter(func(w *zerolog.ConsoleWriter) {
+		w.TimeFormat = time.RFC3339
+	})).With().Timestamp().Logger().Level(zerolog.DebugLevel)
 	ret := &server.Server{
-		Log:        func(subsystem, msg string) { fmt.Printf("subsystem: %s, msg: %s\n", subsystem, msg) },
-		Debug:      func(subsystem, msg string) { fmt.Printf("subsystem: %s, msg: %s\n", subsystem, msg) },
+		Log:        func(subsystem, msg string) { log.Log.Info().Str("subsystem", subsystem).Msgf(msg) },
+		Debug:      func(subsystem, msg string) { log.Log.Debug().Str("subsystem", subsystem).Msgf(msg) },
 		DHCPNoBind: true,
 	}
 
