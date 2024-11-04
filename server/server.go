@@ -48,7 +48,6 @@ type Server struct {
 	// Debug receives extensive logging on Pixiecore's internals. Very
 	// useful for debugging, but very verbose.
 	Debug func(subsystem, msg string)
-
 	// These ports can technically be set for testing, but the
 	// protocols burned in firmware on the client side hardcode these,
 	// so if you change them in production, nothing will work.
@@ -78,7 +77,8 @@ func (s *Server) SetDefaultFirmwares() {
 	s.Ipxe[constants.FirmwareX86PC] = assets.MustAsset("undionly.kpxe")
 	s.Ipxe[constants.FirmwareEFI32] = assets.MustAsset("i386.ipxe.efi")
 	s.Ipxe[constants.FirmwareEFI64] = assets.MustAsset("amd64.ipxe.efi")
-	s.Ipxe[constants.FirmwareEFIBC] = assets.MustAsset("arm64.ipxe.efi")
+	s.Ipxe[constants.FirmwareEFIBC] = assets.MustAsset("amd64.ipxe.efi")
+	s.Ipxe[constants.FirmwareEfiArm64] = assets.MustAsset("arm64.ipxe.efi")
 	s.Ipxe[constants.FirmwareX86Ipxe] = assets.MustAsset("ipxe.pxe")
 }
 
