@@ -131,25 +131,30 @@ func (s *Server) validateDHCP(pkt *dhcp4.Packet) (mach types.Machine, fwtype con
 	// the PXE architecture option.
 	switch fwt {
 	case 0: // x86 BIOS
+		s.debug("DHCP", "We got an x86 BIOS client")
 		mach.Arch = constants.ArchIA32
 		fwtype = constants.FirmwareX86PC
 	case 6: // x86 UEFI
+		s.debug("DHCP", "We got an x86 EFI client")
 		mach.Arch = constants.ArchIA32
 		fwtype = constants.FirmwareEFI32
 	case 7: // x64 UEFI
+		s.debug("DHCP", "We got an x64 EFI client")
 		mach.Arch = constants.ArchX64
 		fwtype = constants.FirmwareEFI64
 	case 9: // EBC
 		mach.Arch = constants.ArchX64
 		fwtype = constants.FirmwareEFIBC
 	case 11: // ARM 64-bit UEFI
+		s.debug("DHCP", "We got an ARM64 client")
 		mach.Arch = constants.ArchArm64
 		fwtype = constants.FirmwareEfiArm64
 	case 16: // http efi boot x64
-		return mach, 0, fmt.Errorf("unsupported client firmware type (probably http4 efi boot)")
+		return mach, 0, fmt.Errorf("unsupported client firmware type (probably http4 x64 efi boot)")
 	case 19: // http efi boot arm64
-		return mach, 0, fmt.Errorf("unsupported client firmware type (probably http4 efi boot)")
+		return mach, 0, fmt.Errorf("unsupported client firmware type (probably http4 arm64 efi boot)")
 	default:
+		s.debug("DHCP", pkt.DebugString())
 		return mach, 0, fmt.Errorf("unsupported client firmware type '%d'", fwt)
 	}
 
