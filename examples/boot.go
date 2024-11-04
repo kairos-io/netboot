@@ -8,16 +8,11 @@ import (
 	"github.com/kairos-io/netboot/log"
 	"github.com/kairos-io/netboot/server"
 	"github.com/kairos-io/netboot/types"
-	"github.com/rs/zerolog"
-	"time"
 )
 
 // This runs a quick server that serves iPXE and Debian netboot files.
 func main() {
-	log.Log = zerolog.New(zerolog.NewConsoleWriter(func(w *zerolog.ConsoleWriter) {
-		w.TimeFormat = time.RFC3339
-	})).With().Timestamp().Logger().Level(zerolog.DebugLevel)
-
+	log.SetDefaultLogger()
 	version := "stable"
 	arch := "amd64"
 	mirror := "http://deb.debian.org/debian"
