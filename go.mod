@@ -9,7 +9,7 @@ require (
 	github.com/google/go-cmp v0.7.0
 	github.com/rs/zerolog v1.34.0
 	golang.org/x/crypto v0.39.0
-	golang.org/x/net v0.39.0
+	golang.org/x/net v0.41.0
 )
 
 require (
