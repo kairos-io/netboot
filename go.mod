@@ -1,6 +1,6 @@
 module github.com/kairos-io/netboot
 
-go 1.26.4
+go 1.26.8
 
 require (
 	github.com/go-bindata/go-bindata v3.1.2+incompatible
