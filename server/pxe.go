@@ -109,7 +109,7 @@ func (s *Server) validatePXE(pkt *dhcp4.Packet) (fwtype constants.Firmware, err 
 	case 11:
 		fwtype = constants.FirmwareEfiArm64
 	default:
-		s.debug("PXE", pkt.DebugString())
+		s.debug("PXE", "%s", pkt.DebugString())
 		return 0, fmt.Errorf("unsupported client firmware type '%d'", fwt)
 	}
 	if s.Ipxe[fwtype] == nil {

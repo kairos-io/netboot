@@ -42,8 +42,8 @@ func main() {
 	log.SetDefaultLogger()
 
 	ret := &server.Server{
-		Log:        func(subsystem, msg string) { log.Log.Info().Str("subsystem", subsystem).Msgf(msg) },
-		Debug:      func(subsystem, msg string) { log.Log.Debug().Str("subsystem", subsystem).Msgf(msg) },
+		Log:        func(subsystem, msg string) { log.Log.Info().Str("subsystem", subsystem).Msg(msg) },
+		Debug:      func(subsystem, msg string) { log.Log.Debug().Str("subsystem", subsystem).Msg(msg) },
 		DHCPNoBind: true,
 	}
 
