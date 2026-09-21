@@ -33,7 +33,7 @@ func (s *Server) serveTFTP(l net.PacketConn) error {
 	s.debug("TFTP", "Listening for TFTP requests on %s:%d", s.Address, s.TFTPPort)
 	ts := tftp.Server{
 		Handler:     s.handleTFTP,
-		InfoLog:     func(msg string) { s.debug("TFTP", msg) },
+		InfoLog:     func(msg string) { s.debug("TFTP", "%s", msg) },
 		TransferLog: s.logTFTPTransfer,
 	}
 	err := ts.Serve(l)

@@ -340,7 +340,7 @@ func parseRRQ(bs []byte) (*rrq, error) {
 			return nil, fmt.Errorf("non-integer block size value %q", val)
 		}
 		if size < 8 || size > 65464 {
-			return nil, fmt.Errorf("unsupported block size %q", size)
+			return nil, fmt.Errorf("unsupported block size %d", size)
 		}
 		req.BlockSize = size
 	}
