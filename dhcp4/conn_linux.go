@@ -91,16 +91,29 @@ func (c *linuxConn) Close() error {
 	return c.conn.Close()
 }
 
+// udpPayload splits the UDP header off the payload of a raw IPv4 packet and
+// reports the source port.
+//
+// The BPF filter only guarantees the destination port is readable, so a
+// datagram that stops inside its own UDP header still reaches us. That is a
+// property of the datagram, not of the socket, hence errMalformedPacket.
+func udpPayload(p []byte) (payload []byte, sport int, err error) {
+	if len(p) < 8 {
+		return nil, 0, fmt.Errorf("%w: UDP datagram is %d bytes, too short for a UDP header", errMalformedPacket, len(p))
+	}
+	return p[8:], int(binary.BigEndian.Uint16(p[:2])), nil
+}
+
 func (c *linuxConn) Recv(b []byte) (rb []byte, addr *net.UDPAddr, ifidx int, err error) {
 	hdr, p, cm, err := c.conn.ReadFrom(b)
 	if err != nil {
 		return nil, nil, 0, err
 	}
-	if len(p) < 8 {
-		return nil, nil, 0, errors.New("not a UDP packet, too short")
+	payload, sport, err := udpPayload(p)
+	if err != nil {
+		return nil, nil, 0, err
 	}
-	sport := int(binary.BigEndian.Uint16(p[:2]))
-	return p[8:], &net.UDPAddr{IP: hdr.Src, Port: sport}, cm.IfIndex, nil
+	return payload, &net.UDPAddr{IP: hdr.Src, Port: sport}, cm.IfIndex, nil
 }
 
 func (c *linuxConn) Send(b []byte, addr *net.UDPAddr, ifidx int) error {
