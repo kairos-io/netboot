@@ -139,6 +139,7 @@ func (s *Server) handleFile(w http.ResponseWriter, r *http.Request) {
 	if name == "" {
 		s.debug("HTTP", "Bad request %q from %s, missing filename", r.URL, r.RemoteAddr)
 		http.Error(w, "missing filename", http.StatusBadRequest)
+		return
 	}
 
 	f, sz, err := s.Booter.ReadBootFile(types.ID(name))
