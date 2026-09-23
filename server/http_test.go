@@ -201,3 +201,31 @@ func TestFile(t *testing.T) {
 		t.Fatalf("Wrong file contents, want %q, got %q", expected, rr.Body.Bytes())
 	}
 }
+
+// A request with no name is answered and nothing else. Before the fix the
+// handler wrote the 400 and then asked the booter for the empty ID anyway, so
+// the client got the error line with whatever the booter returned appended to
+// it, and net/http logged a superfluous WriteHeader call.
+func TestFileMissingName(t *testing.T) {
+	log := func(subsystem, msg string) { t.Logf("[%s] %s", subsystem, msg) }
+	s := &Server{
+		Booter: readBootFile("stuff"),
+		Log:    log,
+		Debug:  log,
+	}
+	rr := httptest.NewRecorder()
+	req, err := http.NewRequest("GET", "/_/file", nil)
+	if err != nil {
+		t.Fatalf("Constructing file request: %s", err)
+	}
+	s.handleFile(rr, req)
+
+	if rr.Code != http.StatusBadRequest {
+		t.Fatalf("Got HTTP %d from request, expected %d", rr.Code, http.StatusBadRequest)
+	}
+
+	expected := "missing filename\n"
+	if rr.Body.String() != expected {
+		t.Fatalf("Wrong error body, want %q, got %q", expected, rr.Body.String())
+	}
+}
