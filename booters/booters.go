@@ -295,6 +295,7 @@ func (b *apibooter) ReadBootFile(id types.ID) (io.ReadCloser, int64, error) {
 			return nil, -1, err
 		}
 		if resp.StatusCode != 200 {
+			_ = resp.Body.Close()
 			return nil, -1, fmt.Errorf("GET %q failed: %s", urlStr, resp.Status)
 		}
 
@@ -316,10 +317,10 @@ func (b *apibooter) WriteBootFile(id types.ID, body io.Reader) error {
 	if err != nil {
 		return err
 	}
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != 200 {
 		return fmt.Errorf("POST %q failed: %s", u, resp.Status)
 	}
-	defer resp.Body.Close()
 	return nil
 }
 
