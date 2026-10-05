@@ -143,7 +143,18 @@ func (p *RandomAddressPool) expireIdentityAssociations() {
 			break
 		}
 		p.identityAssociationExpirations.Shift()
-		delete(p.identityAssociations, p.calculateIAIDHash(expiration.ia.ClientID, expiration.ia.InterfaceID))
+
+		// A released association keeps its place in the queue, and the queue
+		// entry carries only the client and interface ids, which is the same
+		// key the client gets again when it comes back. Expiring on the key
+		// alone would revoke whichever association holds it now and free an
+		// address the pool already handed back, so only expire the exact
+		// association this entry was queued for.
+		hash := p.calculateIAIDHash(expiration.ia.ClientID, expiration.ia.InterfaceID)
+		if current, exists := p.identityAssociations[hash]; !exists || current != expiration.ia {
+			continue
+		}
+		delete(p.identityAssociations, hash)
 		delete(p.usedIps, big.NewInt(0).SetBytes(expiration.ia.IPAddress).Uint64())
 	}
 }
