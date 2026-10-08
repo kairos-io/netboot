@@ -33,8 +33,13 @@ jobs:
           go test -v -coverprofile=coverage.out ./... | go-junit-report > junit.xml
       - name: Codecov
         # Keep uploading once the step above can fail: a red suite is exactly
-        # when its report is worth reading.
+        # when its report is worth reading. continue-on-error keeps the upload
+        # out of the verdict: this job is the repo's test gate, and a Codecov
+        # outage is not a test failure. fail_ci_if_error is not enough on its
+        # own, because a transport error can escape the action as an unhandled
+        # exception, which exits non-zero whatever that input says.
         if: always()
+        continue-on-error: true
         uses: codecov/codecov-action@v7
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
@@ -42,10 +47,10 @@ jobs:
           files: ./coverage.out
       - name: Upload test results to Codecov
         # codecov-action with report_type: test_results replaces the retired
-        # test-results-action. It also leaves fail_ci_if_error at its default
-        # false, so a Codecov outage reports nothing instead of failing a
-        # suite that passed.
+        # test-results-action, which is what failed this job on an SSL
+        # handshake error while the suite itself was green.
         if: always()
+        continue-on-error: true
         uses: codecov/codecov-action@v7
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
