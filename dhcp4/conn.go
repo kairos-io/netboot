@@ -30,6 +30,11 @@ var (
 	dhcpClientPort = 68
 )
 
+// errMalformedPacket marks a datagram that a conn implementation could not
+// parse. It says nothing about the health of the socket, so RecvDHCP drops the
+// datagram and keeps listening instead of reporting a fatal error.
+var errMalformedPacket = errors.New("malformed packet")
+
 const dhcpServerPort = 67
 
 // txType describes how a Packet should be sent on the wire.
@@ -142,6 +147,9 @@ func (c *Conn) RecvDHCP() (*Packet, *net.Interface, error) {
 	var buf [1500]byte
 	for {
 		b, _, ifidx, err := c.conn.Recv(buf[:])
+		if errors.Is(err, errMalformedPacket) {
+			continue
+		}
 		if err != nil {
 			return nil, nil, err
 		}
