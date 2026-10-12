@@ -33,6 +33,20 @@ type Booter interface {
 	WriteBootFile(id ID, body io.Reader) error
 }
 
+// A FileNamer is a Booter that also knows the file name behind an ID.
+//
+// It is optional. A Booter that implements it lets the server mint URLs whose
+// path ends in that name, instead of the opaque /_/file. Clients that take a
+// downloaded file's name from the URL path, which is all a kernel cmdline
+// carries, then get the real name. Without it every served file is called
+// "file", so two of them collide. See kairos-io/kairos#5369.
+//
+// Return "" when the ID has no meaningful name: the server falls back to the
+// plain /_/file URL.
+type FileNamer interface {
+	BootFileName(id ID) string
+}
+
 // An ID is an identifier used by Booters to reference files.
 type ID string
 

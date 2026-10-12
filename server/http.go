@@ -47,6 +47,11 @@ func (s *Server) serveHTTP(mux *http.ServeMux) {
 	s.debug("HTTP", "Listening for HTTP requests on %s:%d", s.Address, s.HTTPPort)
 	mux.HandleFunc("/_/ipxe", s.handleIpxe)
 	mux.HandleFunc("/_/file", s.handleFile)
+	// Same handler under a subtree: a file whose Booter knows its name is
+	// served as /_/file/<name>?name=<id>. The trailing segment is there so
+	// that a client naming its download after the URL path gets the real
+	// name, the lookup key stays the query. See kairos-io/kairos#5369.
+	mux.HandleFunc("/_/file/", s.handleFile)
 	mux.HandleFunc("/_/booting", s.handleBooting)
 }
 
@@ -114,7 +119,7 @@ func (s *Server) handleIpxe(w http.ResponseWriter, r *http.Request) {
 		script, err = ipxeScriptEfi(mach, spec, r.Host)
 	} else {
 		s.log("HTTP", "Constructing ipxe script for %s", mac)
-		script, err = ipxeScript(mach, spec, r.Host)
+		script, err = ipxeScript(mach, spec, r.Host, bootFileNamer(s.Booter))
 	}
 
 	s.debug("HTTP", "Construct ipxe script for %s took %s", mac, time.Since(start))
@@ -197,8 +202,31 @@ func (s *Server) handleBooting(w http.ResponseWriter, r *http.Request) {
 	s.machineEvent(mac, machineStateBooted, "Booting into OS")
 }
 
+// bootFileNamer returns the name lookup for booter, or one that names nothing
+// when the booter does not implement types.FileNamer.
+func bootFileNamer(booter types.Booter) func(types.ID) string {
+	namer, ok := booter.(types.FileNamer)
+	if !ok {
+		return func(types.ID) string { return "" }
+	}
+	return namer.BootFileName
+}
+
+// fileURL builds the URL that serves the file behind id.
+//
+// When the booter knows a name for it, the name goes in the path and the URL
+// ends in a real file name. A client that derives the downloaded file's name
+// from the URL path, which is all a kernel cmdline can carry, then gets that
+// name instead of "file". The query stays the lookup key either way.
+func fileURL(serverHost string, id string, name string) string {
+	if name == "" {
+		return fmt.Sprintf("http://%s/_/file?name=%s", serverHost, url.QueryEscape(id))
+	}
+	return fmt.Sprintf("http://%s/_/file/%s?name=%s", serverHost, url.PathEscape(name), url.QueryEscape(id))
+}
+
 // ipxeScript generates an iPXE script for a machine.
-func ipxeScript(mach types.Machine, spec *types.Spec, serverHost string) ([]byte, error) {
+func ipxeScript(mach types.Machine, spec *types.Spec, serverHost string, fileName func(types.ID) string) ([]byte, error) {
 	if spec.IpxeScript != "" {
 		return []byte(spec.IpxeScript), nil
 	}
@@ -226,7 +254,7 @@ func ipxeScript(mach types.Machine, spec *types.Spec, serverHost string) ([]byte
 	}
 
 	f := func(id string) string {
-		return fmt.Sprintf("http://%s/_/file?name=%s", serverHost, url.QueryEscape(id))
+		return fileURL(serverHost, id, fileName(types.ID(id)))
 	}
 	cmdline, err := utils.ExpandCmdline(spec.Cmdline, template.FuncMap{"ID": f})
 	if err != nil {

@@ -26,6 +26,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -136,6 +137,50 @@ func (s *staticBooter) ReadBootFile(id types.ID) (io.ReadCloser, int64, error) {
 
 func (s *staticBooter) WriteBootFile(types.ID, io.Reader) error {
 	return nil
+}
+
+// BootFileName implements types.FileNamer for the files this booter was
+// configured with, so the server can serve them under their own name.
+//
+// The kernel and the initrds are not named: iPXE loads them with an explicit
+// --name and nothing downstream reads their URL. The "other-N" files are the
+// ones a cmdline hands to the booted system, which has only the URL to go by.
+func (s *staticBooter) BootFileName(id types.ID) string {
+	path := string(id)
+	if !strings.HasPrefix(path, "other-") {
+		return ""
+	}
+	i, err := strconv.Atoi(path[6:])
+	if err != nil || i < 0 || i >= len(s.otherIDs) {
+		return ""
+	}
+	return fileNameFromLocation(s.otherIDs[i])
+}
+
+// fileNameFromLocation takes the file name out of a local path or an URL.
+//
+// For an URL it uses the path only, so a "?token=..." is not baked into the
+// name, and it unescapes it so that a percent-encoded name survives the round
+// trip. Returns "" when the location names no file.
+func fileNameFromLocation(location string) string {
+	name := location
+	if u, err := url.Parse(location); err == nil && u.Scheme != "" {
+		// An URL names a file only in its path. Falling back to the raw
+		// location here would take the name out of the host.
+		if u.Path == "" {
+			return ""
+		}
+		unescaped, err := url.PathUnescape(u.Path)
+		if err != nil {
+			unescaped = u.Path
+		}
+		name = unescaped
+	}
+	name = filepath.Base(name)
+	if name == "." || name == string(filepath.Separator) {
+		return ""
+	}
+	return name
 }
 
 // APIBooter gets a BootSpec from a remote server over HTTP.
