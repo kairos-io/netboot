@@ -274,7 +274,7 @@ func ipxeScriptEfi(mach types.Machine, spec *types.Spec, serverHost string) ([]b
 
 	var b bytes.Buffer
 	b.WriteString("#!ipxe\n")
-	b.WriteString(fmt.Sprintf("chain --autofree http://%s/_/file?name=%s&type=efi&mac=%s\n", serverHost, spec.Efi, url.QueryEscape(mach.MAC.String())))
+	fmt.Fprintf(&b, "chain --autofree http://%s/_/file?name=%s&type=efi&mac=%s\n", serverHost, url.QueryEscape(string(spec.Efi)), url.QueryEscape(mach.MAC.String()))
 	b.WriteByte('\n')
 
 	return b.Bytes(), nil
